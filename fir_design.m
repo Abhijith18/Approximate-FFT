@@ -1,0 +1,61 @@
+
+
+clear all;
+figure(1);
+M = 149;
+fs = 48000;
+fc = 1500;
+n = -74:1:74;
+h1 = sinc(2*n*(fc/fs))*2*(fc/fs);
+subplot(4,1,1);
+stem(n, h1);
+title("h_1[n]");
+xlabel("n");
+ylabel("Amplitude");
+w = hann(M);
+h2 = h1'.*w;
+subplot(4,1,2);
+stem(n, w);
+title("Hanning Window (M = 149)");
+xlabel("n");
+ylabel("Amplitude");
+subplot(4,1,3);
+stem(n, h2);
+title("h_2[n]");
+xlabel("n");
+ylabel("Amplitude");
+subplot(4,1,4);
+stem(n+74, h2);
+title("Causality Enforcement");
+xlabel("n");
+ylabel("Amplitude");
+H2 = fftshift(fft(h2));
+figure(4);
+%subplot(5,1,5);
+
+stem((-length(H2)/2:1:length(H2)/2-1)*(fs/length(h2)), abs(H2));
+title("H_2[f]");
+xlabel("frequency");
+ylabel("Amplitude");
+
+[y, fs] = audioread('19.wav');
+figure(3);
+Y = fftshift(fft(y, 1024));
+Y = Y/length(Y);
+subplot(2,1,1);
+plot((-length(Y)/2:1:length(Y)/2-1)*(fs/length(Y)), abs(Y));
+xlim([-150,150]*(fs/length(Y)));
+title("1024 point dft of 19.wav signal before filtering");
+hy = conv(y(:,1), h2);
+hy = [hy, conv(y(:,2), h2)];
+HY = fftshift(fft(hy, 1024));
+HY = HY/length(HY);
+filename = '19c1.wav';
+audiowrite(filename, hy, fs);
+HY = fftshift(fft(hy, 1024));
+HY = HY/length(HY);
+subplot(2,1,2);
+plot((-length(HY)/2:1:length(HY)/2-1)*(fs/length(HY)), abs(HY));
+xlim([-150,150]*(fs/length(Y)));
+title("1024 point dft of 48.wav signal after filtering");
+
